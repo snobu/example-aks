@@ -32,7 +32,7 @@ jobs:
         login-server: shipyard.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
-      run: |
+    - run: |
         docker push shipyard.azurecr.io/aks-example-octozen    
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl

@@ -28,7 +28,7 @@ jobs:
         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
       with:
-        args: login -u $ACR_USERNAME -p $ACR_PASSWORD shipyard.azurecr.io
+        args: echo $ACR_PASSWORD | login -u $ACR_USERNAME --password-stdin shipyard.azurecr.io
     - name: Deploy branch filter
       uses: actions/bin/filter@master
       with:

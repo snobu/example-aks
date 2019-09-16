@@ -1,0 +1,48 @@
+on: push
+name: Build and Deploy
+jobs:
+  buildDockerImage:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Build Docker image
+      uses: docker://docker:stable
+      with:
+        args: build -t aks-example-octozen .
+    - name: Load AKS kube credentials
+      uses: docker://swinton/azure
+      env:
+        AZURE_SERVICE_APP_ID: ${{ secrets.AZURE_SERVICE_APP_ID }}
+        AZURE_SERVICE_PASSWORD: ${{ secrets.AZURE_SERVICE_PASSWORD }}
+        AZURE_SERVICE_TENANT: ${{ secrets.AZURE_SERVICE_TENANT }}
+      with:
+        args: aks get-credentials --resource-group kardashian --name kardashian
+    - name: Tag image for ACR
+      uses: actions/docker/tag@master
+      with:
+        args: aks-example-octozen shipyard.azurecr.io/aks-example-octozen
+    - name: Setup ACR
+      uses: docker://swinton/azure
+      env:
+        AZURE_SERVICE_PASSWORD: ${{ secrets.AZURE_SERVICE_PASSWORD }}
+        AZURE_SERVICE_TENANT: ${{ secrets.AZURE_SERVICE_TENANT }}
+      with:
+        args: acr login --name shipyard
+    - name: Deploy branch filter
+      uses: actions/bin/filter@master
+      with:
+        args: branch master
+    - name: Push image to ACR
+      uses: docker://docker:stable
+      with:
+        args: push shipyard.azurecr.io/aks-example-octozen
+    - name: Deploy to AKS
+      uses: docker://gcr.io/cloud-builders/kubectl
+      with:
+        entrypoint: sh
+        args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:latest"
+    - name: Verify AKS deployment
+      uses: docker://gcr.io/cloud-builders/kubectl
+      with:
+        args: rollout status deployment/aks-example-octozen

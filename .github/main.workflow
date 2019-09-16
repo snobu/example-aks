@@ -27,20 +27,20 @@ action "Load AKS kube credentials" {
 action "Setup ACR" {
   needs = ["Load AKS kube credentials"]
   uses = "docker://swinton/azure"
-  args = "acr login --name AKSExampleOctozenRegistry"
+  args = "acr login --name shipyard"
   secrets = ["AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
 }
 
 action "Tag image for ACR" {
   needs = ["Build Docker image"]
   uses = "actions/docker/tag@master"
-  args = ["aks-example-octozen", "aksexampleoctozenregistry.azurecr.io/aks-example-octozen"]
+  args = ["aks-example-octozen", "shipyard.azurecr.io/aks-example-octozen"]
 }
 
 action "Push image to ACR" {
   needs = ["Setup ACR", "Tag image for ACR"]
   uses = "docker://docker:stable"
-  args = "push aksexampleoctozenregistry.azurecr.io/aks-example-octozen"
+  args = "push shipyard.azurecr.io/aks-example-octozen"
 }
 
 action "Deploy branch filter" {
@@ -53,7 +53,7 @@ action "Deploy to AKS" {
   needs = ["Push image to ACR", "Deploy branch filter"]
   uses = "docker://gcr.io/cloud-builders/kubectl"
   runs = "sh -l -c"
-  args = ["kubectl set image deployment aks-example-octozen aks-example-octozen=aksexampleoctozenregistry.azurecr.io/aks-example-octozen:latest"]
+  args = ["kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:latest"]
 }
 
 action "Verify AKS deployment" {

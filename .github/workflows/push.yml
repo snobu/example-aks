@@ -18,17 +18,17 @@ jobs:
         AZURE_SERVICE_TENANT: ${{ secrets.AZURE_SERVICE_TENANT }}
       with:
         args: aks get-credentials --resource-group kardashian --name kardashian
-    - name: Tag image for ACR
-      uses: actions/docker/tag@master
-      env:
-        GITHUB_SHA: ${{ github.sha }}
-      with:
-        args: aks-example-octozen shipyard.azurecr.io/aks-example-octozen
+    #- name: Tag image for ACR
+    #  uses: actions/docker/tag@master
+    #  env:
+    #    GITHUB_SHA: ${{ github.sha }}
+    #  with:
+    #    args: aks-example-octozen shipyard.azurecr.io/aks-example-octozen
     - name: Deploy branch filter
       uses: actions/bin/filter@master
       with:
         args: branch master
-    - name: Push image to ACR
+    - name: Tag and push image to ACR
       uses: azure/container-actions/docker-login@master
       env:
         GITHUB_SHA: ${{ github.sha }}
@@ -37,6 +37,7 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - run: |
+        docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
         docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl

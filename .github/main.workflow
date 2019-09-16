@@ -16,15 +16,19 @@ action "Build Docker image" {
 
 action "Load AKS kube credentials" {
   uses = "docker://swinton/azure"
-  secrets = ["AZURE_SERVICE_APP_ID", "AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
-  args = "aks get-credentials --resource-group AKSExampleOctozenCluster --name AKSExampleOctozenCluster"
+  secrets = [
+    "AZURE_SERVICE_PASSWORD",
+    "AZURE_SERVICE_TENANT",
+    "AZURE_SERVICE_APP_ID",
+  ]
+  args = "aks get-credentials --resource-group kardashian --name kardashian"
 }
 
 action "Setup ACR" {
   needs = ["Load AKS kube credentials"]
   uses = "docker://swinton/azure"
   args = "acr login --name AKSExampleOctozenRegistry"
-  secrets = ["AZURE_SERVICE_APP_ID", "AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
+  secrets = ["AZURE_SERVICE_PASSWORD", "AZURE_SERVICE_TENANT"]
 }
 
 action "Tag image for ACR" {

@@ -39,7 +39,7 @@ jobs:
       with:
         entrypoint: sh
         args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:latest"
-    - name: Verify AKS deployment
-      uses: docker://gcr.io/cloud-builders/kubectl
-      with:
-        args: rollout status deployment/aks-example-octozen
+    #- name: Verify AKS deployment
+    #  uses: docker://gcr.io/cloud-builders/kubectl
+    #  with:
+    #    args: rollout status deployment/aks-example-octozen

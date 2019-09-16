@@ -22,21 +22,18 @@ jobs:
       uses: actions/docker/tag@master
       with:
         args: aks-example-octozen shipyard.azurecr.io/aks-example-octozen
-    - name: Setup ACR
-      uses: docker://docker:stable
-      env:
-        ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
-        ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
-      with:
-        args: echo $ACR_PASSWORD | login -u $ACR_USERNAME --password-stdin shipyard.azurecr.io
     - name: Deploy branch filter
       uses: actions/bin/filter@master
       with:
         args: branch master
     - name: Push image to ACR
-      uses: docker://docker:stable
+    - uses: azure/container-actions/docker-login@master
       with:
-        args: push shipyard.azurecr.io/aks-example-octozen
+        login-server: shipyard.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    - run: |
+        docker push shipyard.azurecr.io/aks-example-octozen    
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl
       with:

@@ -18,7 +18,7 @@ spec:
       - name: aks-example-octozen
         # Replace $ACR_LOGIN_SERVER with your ACR login server name from:
         # az acr list --resource-group $RESOURCE_GROUP --query "[].{acrLoginServer:loginServer}" --output table
-        image: shipyard.azurecr.io/aks-example-octozen:v1
+        image: shipyard.azurecr.io/aks-example-octozen:latest
         ports:
         - containerPort: 80
         resources:

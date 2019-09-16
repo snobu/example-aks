@@ -27,8 +27,10 @@ jobs:
       env:
         AZURE_SERVICE_PASSWORD: ${{ secrets.AZURE_SERVICE_PASSWORD }}
         AZURE_SERVICE_TENANT: ${{ secrets.AZURE_SERVICE_TENANT }}
+        ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+        ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
       with:
-        args: acr login --name shipyard
+        args: acr login --name shipyard -u $ACR_USERNAME -p $ACR_PASSWORD
     - name: Deploy branch filter
       uses: actions/bin/filter@master
       with:

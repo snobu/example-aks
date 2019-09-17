@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: aks-example-octozen
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-HAS-TRAVERSED-NGINX-INGRESS true;
+spec:
+  tls:
+  - hosts:
+    - zen.kardashian.snobu.org
+    secretName: octozen
+  rules:
+  - host: zen.kardashian.snobu.org
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: aks-example-octozen
+          servicePort: 80

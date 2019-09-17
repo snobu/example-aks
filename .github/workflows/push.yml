@@ -18,12 +18,6 @@ jobs:
         AZURE_SERVICE_TENANT: ${{ secrets.AZURE_SERVICE_TENANT }}
       with:
         args: aks get-credentials --resource-group kardashian --name kardashian
-    #- name: Tag image for ACR
-    #  uses: actions/docker/tag@master
-    #  env:
-    #    GITHUB_SHA: ${{ github.sha }}
-    #  with:
-    #    args: aks-example-octozen shipyard.azurecr.io/aks-example-octozen
     - name: Deploy branch filter
       uses: actions/bin/filter@master
       with:
@@ -32,21 +26,18 @@ jobs:
       uses: azure/container-actions/docker-login@master
       env:
         GITHUB_SHA: ${{ github.sha }}
+        GITHUB_SHA_SHORT: $(echo $GITHUB_SHA | cut -c 1-6)
       with:
         login-server: shipyard.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - run: |
-        docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
-        docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
+        docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
+        docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl
       env:
         GITHUB_SHA: ${{ github.sha }}
       with:
         entrypoint: sh
-        args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA"
-    #- name: Verify AKS deployment
-    #  uses: docker://gcr.io/cloud-builders/kubectl
-    #  with:
-    #    args: rollout status deployment/aks-example-octozen
+        args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT"

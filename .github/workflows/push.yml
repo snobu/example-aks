@@ -5,6 +5,8 @@ jobs:
     name: Build Docker image and deploy to Azure Kubernetes Service
     runs-on: ubuntu-latest
     steps:
+    - name: Set some env vars
+      run: echo ::set-env name=GITHUB_SHA_SHORT::{ $(echo $GITHUB_SHA | cut -c 1-6) }
     - uses: actions/checkout@master
     - name: Build Docker image
       uses: docker://docker:stable
@@ -29,10 +31,10 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - run: |
-        docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
-        docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA
+        docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
+        docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl
       with:
         entrypoint: sh
-        args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA"
+        args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT"

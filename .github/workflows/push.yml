@@ -25,20 +25,17 @@ jobs:
     - name: Tag and push image to ACR
       uses: azure/container-actions/docker-login@master
       env:
-        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_SHA_SHORT: ${{ $(echo $GITHUB_SHA | cut -c 1-6) }}
       with:
         login-server: shipyard.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - run: |
-        export GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)
         echo GITHUB_SHA_SHORT is $GITHUB_SHA_SHORT.
         docker tag aks-example-octozen shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
         docker push shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT
     - name: Deploy to AKS
       uses: docker://gcr.io/cloud-builders/kubectl
-      env:
-        GITHUB_SHA: ${{ github.sha }}
       with:
         entrypoint: sh
         args: -l -c "kubectl set image deployment aks-example-octozen aks-example-octozen=shipyard.azurecr.io/aks-example-octozen:$GITHUB_SHA_SHORT"
